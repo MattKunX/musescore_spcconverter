@@ -1,0 +1,1 @@
+/home/jared/Documents/MuseScore3/Plugins/spcconverter.qml
