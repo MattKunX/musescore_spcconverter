@@ -10,10 +10,10 @@
 import MuseScore 3.0
 import FileIO 3.0
 import QtQuick 2.2
-import QtQuick.Dialogs 1.3
+import QtQuick.Dialogs 1.0
 import QtQuick.Controls 2.0
 import QtQuick.Controls.Styles 1.4
-import QtQuick.Layouts 1.5
+import QtQuick.Layouts 1.0
 
 MuseScore {
     menuPath: "Plugins.SPC Converter"
@@ -76,6 +76,8 @@ MuseScore {
                 implicitHeight: 200
             }
         }
+        
+        CheckBox { Layout.leftMargin: 10; id: unixPathsBox; text: "Use UNIX filepaths" }
 
         RowLayout {
             Layout.leftMargin: 10
@@ -159,8 +161,15 @@ MuseScore {
         title: "Export Location"
         folder: shortcuts.home
         onAccepted: {
-            filePathLabel.text = fileDialog.fileUrl.toString();
-            exportFile.source = filePathLabel.text.substring(7, filePathLabel.text.length);
+            var path = fileDialog.fileUrl.toString();
+            if (unixPathsBox.checked) {
+                 filePathLabel.text = path.substring(7, path.length);
+                 exportFile.source = path.substring(7, path.length);
+            } else {
+                 filePathLabel.text = path.substring(8, path.length);
+                 exportFile.source = path.substring(8, path.length);
+            }
+            
         }
     }
 
