@@ -1,6 +1,6 @@
 # SPC Converter for Musescore
 
-<center> ![](docs/sample_image.png) </center>
+<center> ![Sample Image](docs/sample_image.png) </center>
 
 SPC Converter is plugin for Musescore that can convert a score written in standard musical notation into a text format, which can then be processed by software like [AddMusicK](https://www.smwcentral.net/?p=section&a=details&id=24994) and inserted into a Super Mario World ROM for use in custom romhacks. Before attempting to write music using this plugin, you should be familiar with the basics of SMW music porting, for example as described [here](https://www.smwcentral.net/?p=viewthread&t=89606#0.2). It will run on any platform supported by MuseScore, although if you are on macOS or Linux, you will need to run AddMusicK via Wine or another compatibility layer.
 
