@@ -620,7 +620,7 @@ MuseScore {
         //very reasonably be in 6/4 or some other time signature
         //Where the measure is longer than a single whole note
         for (var remaining = staffVoices.length; remaining < 8; remaining++) {
-            output += "\n#" + remaining.toString() + "\nv255 [r1]" + numMeasures * 8 + "\n"
+            output += "\n#" + remaining.toString() + "\n"
         }
 
         if (staffVoices.length > 8) {
