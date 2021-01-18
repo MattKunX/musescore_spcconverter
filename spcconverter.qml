@@ -546,7 +546,6 @@ MuseScore {
     //Iterates through the score and generates an equivalent text file which can be
     //Provided to AddMusicK and compiled into SPC format
     function processScore(){
-        saveDefaults();
         var cursor = curScore.newCursor();
         var startStaff = 0;
         var endStaff = curScore.nstaves - 1;
