@@ -2,7 +2,7 @@
 
 <center> ![Sample Image](docs/sample_image.png) </center>
 
-This is a fork of Jared Bitz SPC Converter v0.0.1 on GitLab (https://gitlab.com/jbitz/spcconverter). This project is an attempt by the Com_poser (https://www.twitch.tv/com_poser) smw music porting community to continue the plugins development into a more feature robust exporter. If you would like to join this project and more please stop by the com_poser discord(https://discord.gg/MTJyspQN).
+This is a fork of Jared Bitz SPC Converter v0.0.1 on [GitLab](https://gitlab.com/jbitz/spcconverter). This project is an attempt by the [Com_poser](https://www.twitch.tv/com_poser) smw music porting community to continue the plugins development into a more feature robust exporter. If you would like to join this project and more please stop by the com_poser [discord](https://discord.gg/MTJyspQN).
 
 SPC Converter is plugin for Musescore that can convert a score written in standard musical notation into a text format, which can then be processed by software like [AddMusicK](https://www.smwcentral.net/?p=section&a=details&id=24994) and inserted into a Super Mario World ROM for use in custom romhacks. Before attempting to write music using this plugin, you should be familiar with the basics of SMW music porting, for example as described [here](https://www.smwcentral.net/?p=viewthread&t=89606#0.2). It will run on any platform supported by MuseScore, although if you are on macOS or Linux, you will need to run AddMusicK via Wine or another compatibility layer.
 
@@ -13,9 +13,9 @@ SPC Converter is plugin for Musescore that can convert a score written in standa
 ### Installation
 Download `spcconverter.qml`, either from the command line with 
 
-	git clone https://gitlab.com/jbitz/spcconverter.git 
+	git clone https://github.com/MattKunX/musescore_spcconverter.git 
 
-or by downloading the file directly from GitLab (click on its name, then use the download button at the top right). Then, copy it into your MuseScore plugins directory (the default is `Documents/Musescore3/Plugins`). You then need to enable it by opening up MuseScore and clicking on `Plugins -> Plugin Manager`. From there, click the box next to the `spcconverter` plugin in order to enable it. You may have to click the "Reload Plugins" button for `spcconverter` to show up.
+or by downloading the file directly from GitHub (click on its name, then use the download button at the top right). Then, copy it into your MuseScore plugins directory (the default is `Documents/Musescore3/Plugins`). You then need to enable it by opening up MuseScore and clicking on `Plugins -> Plugin Manager`. From there, click the box next to the `spcconverter` plugin in order to enable it. You may have to click the "Reload Plugins" button for `spcconverter` to show up.
 
 ### Supported Features
 - Any kind of key signature and accidental, including key signature changes in the middle of a piece
