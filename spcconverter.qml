@@ -1,6 +1,8 @@
 /* 
- * SPC Converter v0.0.1
- * Created/maintained by Jared Bitz
+ * SPC Converter v0.0.2
+ * Created by Jared Bitz (v0.0.1)
+ * Updated by MattKun
+ * Changelog  % adds repeat # with auto [] grouping, fixed start minimized (height), invisible notes ignored/skipped, spaces between notes checkbox, added exporting notes as -flats.
  * ------------------------------------------
  * A MuseScore plugin for converting a score into a text format which can be compiled and
  * inserted into a Super Mario World ROM using using AddMusicK,
@@ -18,10 +20,11 @@ import QtQuick.Layouts 1.0
 MuseScore {
     menuPath: "Plugins.SPC Converter"
     description: "Converts your score to a .txt file which can be compiled by AddMusicK and inserted into a Super Mario World ROM."
-    version: "0.0.1"
+    version: "0.0.2"
     pluginType: "dock"
     dockArea:   "right"
     width:  400
+    height: 2500
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -59,7 +62,20 @@ MuseScore {
             Text { text: "Octave adjust: "}
             SpinBox { id: octaveAdjust; from: -5; to: 5; value: -2 }
         }
-            
+
+        RowLayout {
+            Layout.leftMargin: 10
+            Layout.topMargin: 10
+            Text { text: "Measures per line: "}
+            TextField { id: measuresPerLineField; text: "5"; implicitWidth: 30; maximumLength: 2 }
+        }
+
+        RowLayout {
+            Layout.leftMargin: 10
+            Layout.topMargin: 10   
+            CheckBox { id: note_spacesCheckBox; text: "Spaces between notes" }
+            CheckBox { id: measure_spacesCheckBox; text: "Spaces between measures" }
+        }
         CheckBox { Layout.leftMargin: 10; id: swingCheckBox; text: "Swing 8th notes" }
         CheckBox { Layout.leftMargin: 10; id: includeLabelsBox; text: "Include section labels" }
 
@@ -153,6 +169,7 @@ MuseScore {
             Layout.fillHeight: true
             wrapMode: TextEdit.Wrap
         }
+        
     }
     //Dialogs
     FileDialog {
@@ -242,20 +259,20 @@ MuseScore {
     //Converts a MuseScore tpc value into the corresponding note name for AddMusicK's SPC compiler
     function tpcToSpcName(tpc) {
         switch(tpc) {
-            case -1: return "d+";
-            case 0: return "a+";
-            case 1: return "f";
-            case 2: return "c";
-            case 3: return "g";
-            case 4: return "d";
-            case 5: return "a";
-            case 6: return "e";
-            case 7: return "b";
-            case 8: return "f+";
-            case 9: return "c+";
-            case 10: return "g+";
-            case 11: return "d+";
-            case 12: return "a+"
+            case -1: return "e-";
+            case 0:  return "b-";
+            case 1:  return "f";
+            case 2:  return "c";
+            case 3:  return "g";
+            case 4:  return "d";
+            case 5:  return "a";
+            case 6:  return "e";
+            case 7:  return "b";
+            case 8:  return "g-";
+            case 9:  return "d-";
+            case 10: return "a-";
+            case 11: return "e-";
+            case 12: return "b-";
             case 13: return "f";
             case 14: return "c";
             case 15: return "g";
@@ -333,7 +350,7 @@ MuseScore {
         var positionInMeasure = fraction(0, 1);
         while (curSegment.prevInMeasure != null) {
             curSegment = curSegment.prevInMeasure;
-            //Search back in this specific track
+            //Search back in this specific track **note Type check always seems to return True**
             if (curSegment.segmentType == Segment.ChordRest && curSegment.elementAt(trackID) != null) {
                 positionInMeasure = addFrac(positionInMeasure, curSegment.elementAt(trackID).actualDuration);
             }     
@@ -374,6 +391,9 @@ MuseScore {
     //returns the a string representing its proper duration (possibly modified to account
     //for swing
     function durationStringFromFraction(duration, positionInMeasure) {
+
+         console.log("durfrac: "+duration.numerator+"/"+duration.denominator,"posFrac: "+positionInMeasure.numerator+"/"+positionInMeasure.denominator);
+
         if (swingCheckBox.checked && duration.denominator == 8) {
             return getSwingDuration(duration, positionInMeasure);
 
@@ -389,9 +409,10 @@ MuseScore {
         return durationStringFromFraction(note.parent.actualDuration, positionInMeasure);
     }
 
-    //Takes a ScoreElement (either a rest or a chord) and returns its string representation to be used in
+    //Takes a Cursor with a ScoreElement (either a rest or a chord) and returns its string representation to be used in
     //AddMusicK's compiler
-    function stringifyElement(elm, trackID) {
+    function stringifyElement(cursor, trackID) {
+        var elm = cursor.element;
         var noteName = "";
         var lengthString = "";
         if (elm.type == Element.CHORD) {
@@ -417,6 +438,12 @@ MuseScore {
             lengthString = durationStringFromFraction(elm.actualDuration, positionInMeasure);
             noteName = "r";
         }
+
+        // add a space between notes for legiblity
+        if (note_spacesCheckBox.checked) {
+            lengthString += " ";
+        }
+
         return noteName + lengthString;
     }
 
@@ -442,10 +469,14 @@ MuseScore {
 
         var curOctave = getOctave(curNote);
 
+        var space = '';
+        if (measure_spacesCheckBox.checked || note_spacesCheckBox.checked)
+            space = ' ';
+
         if (prevOctave == curOctave) return "";
         else if (curOctave == prevOctave + 1) return ">";
         else if (curOctave == prevOctave - 1) return "<";
-        else return "o" + curOctave;
+        else return "o" + curOctave + space;
     }
 
     //Processes any command written into the score as staff text with a "*" or "-" prefix
@@ -559,7 +590,7 @@ MuseScore {
         var startStaff = 0;
         var endStaff = curScore.nstaves - 1;
         var staffVoices = [];
-        
+
         if (swingCheckBox.checked) {
             debugLog("Warning: Swing is turned on. Make sure that within each channel, in any beat where eighth notes occur, there are no notes of shorter" +
             " value. Otherwise, your channels may be out of sync. See the readme for more information.");
@@ -568,43 +599,137 @@ MuseScore {
         for (var staff = startStaff; staff <= endStaff; staff++) {
             var finalResult = "\n#" + staff.toString() + "\n";
             var prevNote = null;
+            var prevType = null;
+            var isNext = true;
+            var current_measure = null;
+            var measures = 1;
+            var measure_segments = "";
+            var repeatedCount = 1;
 
             cursor.rewind(0);
             cursor.staffIdx = staff;
 
+
             while (cursor.segment) {
+
+                /* doesn't work
+                if (cursor.measure != current_measure) {
+                    current_measure = cursor.measure;
+                    measures++;
+                }
+                */
+
+                // at every new measure put last measures group of notes into the final string. (also count measures)
+                if (cursor.measure.firstSegment.is(cursor.segment)) {
+                        
+                        //console.log("current: "+cursor.element.name);
+
+                        if (measure_spacesCheckBox.checked && (cursor.element.type !== Element.REPEAT_MEASURE && prevType !== Element.REPEAT_MEASURE)) {
+                            measure_segments += " ";
+                        }
+
+                        // put previous into group if this segment is a repeat
+                        if (cursor.element.type === Element.REPEAT_MEASURE && prevType !== Element.REPEAT_MEASURE && measure_segments.indexOf('[') == -1 && measure_segments.indexOf(']') == -1) {  
+                            finalResult += "["+measure_segments+"]";
+                        } else {
+                            finalResult += measure_segments;
+                        }
+ 
+                        // add new lines
+                        if (measures % measuresPerLineField.text == 0) {
+                            finalResult += "\n";
+                        }
+                        
+                        console.log(measures,'"'+measure_segments+'"',cursor.element.name);
+                        
+                        measure_segments = "";
+                        measures++;
+                }
+
                 var prefix = "";
                 var postfix = "";
+
                 //Process annotations if needed
                 if (cursor.segment.annotations.length > 0) {
                     var result = processAnnotations(cursor.segment.annotations, cursor.element.staff);
                     prefix = result.prefix;
                     postfix = result.postfix;
                 }
-                finalResult += prefix;
+                measure_segments += prefix;
 
-                if (cursor.element && cursor.element.type === Element.CHORD) {
-                    if (cursor.element.notes.length > 1) {
-                        debugLog("Warning: Multiple notes found in chord at measure " 
-                            + getMeasureNumber(cursor.measure) + ", channel " + staff
-                            + ". All but one will be ignored.");
-                    }
-                    finalResult += getOctaveModifier(prevNote, cursor.element.notes[0]);
-                    prevNote = cursor.element.notes[0];
-                    if (prefix.indexOf("$dd") == 0 || prefix.indexOf("$DD") == 0) { //Special case for pitch bends
-                        var stringified = stringifyElement(cursor.element, staff * 4);
-                        finalResult += stringified[0] + "^" + stringified.substring(1, stringified.length);
-                    } else {
-                        finalResult += stringifyElement(cursor.element, staff * 4);
-                    }
-                }
-                if (cursor.element && cursor.element.type === Element.REST) {
-                    finalResult += stringifyElement(cursor.element, staff * 4);
-                }
-                finalResult += postfix;
+                // check cursor element exists and is visible
+                if (cursor.element && cursor.element.visible) {
 
-                cursor.next();
+                    // check note visibility and color
+                    if (cursor.element.notes && cursor.element.notes[0]) {
+                        
+                        if (!cursor.element.notes[0].visible) {
+                            cursor.next();
+                            continue;
+                        }
+                        
+                        // ouput hex color information
+                        //measure_segments += " "+cursor.element.notes[0].color+" ";
+                    }
+
+                    // end of repeated measures
+                    if (prevType === Element.REPEAT_MEASURE && cursor.element.type !== Element.REPEAT_MEASURE) {
+                        measure_segments += repeatedCount;
+                        repeatedCount = 1;
+
+                        if (measure_spacesCheckBox.checked) {
+                                measure_segments += " ";
+                        }
+                    }
+
+                    // add note
+                    if (cursor.element.type === Element.CHORD) {
+                        if (cursor.element.notes.length > 1) {
+                            debugLog("Warning: Multiple notes found in chord at measure " 
+                                + getMeasureNumber(cursor.measure) + ", channel " + staff
+                                + ". All but one will be ignored.");
+                        }
+                        measure_segments += getOctaveModifier(prevNote, cursor.element.notes[0]);
+                        prevNote = cursor.element.notes[0];
+                        if (prefix.indexOf("$dd") == 0 || prefix.indexOf("$DD") == 0) { //Special case for pitch bends
+                            var stringified = stringifyElement(cursor, staff * 4);
+                            measure_segments += stringified[0] + "^" + stringified.substring(1, stringified.length);
+                        } else {
+                            measure_segments += stringifyElement(cursor, staff * 4);
+                        }
+                        
+                    }
+
+                    // add rest
+                    if (cursor.element.type === Element.REST) {
+                        measure_segments += stringifyElement(cursor, staff * 4);
+                    }
+
+                    // add repeat measure
+                    if (cursor.element.type === Element.REPEAT_MEASURE) {
+                        repeatedCount++;
+                    }
+
+                    //if (cursor.nextInMeasure()) {
+                    //          measure_segments += "{next}";
+                    //}
+                    //measure_segments += "{"+cursor.element.type+" "+Element.REPEAT_MEASURE+"} ";
+                    //measure_segments += "{"+cursor.stringNumber+"}";
+
+                    measure_segments += postfix;
+
+                    prevType = cursor.element.type;
+                }
+                
+                var isnext = cursor.next();
+                if (!isnext && repeatedCount > 1) {
+                    measure_segments += repeatedCount;
+                    repeatedCount = 1;
+                }
             }
+            console.log('final string: '+measure_segments, 'measures: '+measures);
+            finalResult += measure_segments;
+            //finalResult += " Measures: "+measures;
             staffVoices.push(finalResult);
         }
 
