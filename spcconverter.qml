@@ -76,7 +76,14 @@ MuseScore {
             CheckBox { id: note_spacesCheckBox; text: "Spaces between notes" }
             CheckBox { id: measure_spacesCheckBox; text: "Spaces between measures" }
         }
-        CheckBox { Layout.leftMargin: 10; id: swingCheckBox; text: "Swing 8th notes" }
+        
+        RowLayout {
+            Layout.leftMargin: 10
+            Layout.topMargin: 10
+            CheckBox { id: swing8CheckBox; text: "Swing 8th notes" }
+            CheckBox { id: swing16CheckBox; text: "Swing 16th notes" }
+        }
+        
         CheckBox { Layout.leftMargin: 10; id: includeLabelsBox; text: "Include section labels" }
 
         Text { Layout.leftMargin: 10; text: "Header (use for custom instruments, metadata, etc.):" }
@@ -381,7 +388,14 @@ MuseScore {
 
         //If the position in the measure has a denominator of 8, then this note must be on an offbeat
         //(again, it's in reduced form, so a denominator of 8 means the numerator cannot be odd)
-        var swungPortion = positionInMeasure.denominator == 8 ? fraction(1, 12) : fraction(2, 12);
+        var swungPortion = fraction(0,1);
+
+        if (swing8CheckBox.checked)
+            swungPortion = positionInMeasure.denominator == 8 ? fraction(1, 12) : fraction(2, 12);
+       
+        if (swing16CheckBox.checked)
+            swungPortion = positionInMeasure.denominator == 16 ? fraction(1, 24) : fraction(2, 24);
+        
         var finalDuration = addFrac(nonSwungPortion, swungPortion);
 
         return literalDurationStringFromFraction(finalDuration);
@@ -394,7 +408,7 @@ MuseScore {
 
          console.log("durfrac: "+duration.numerator+"/"+duration.denominator,"posFrac: "+positionInMeasure.numerator+"/"+positionInMeasure.denominator);
 
-        if (swingCheckBox.checked && duration.denominator == 8) {
+        if ( (swing8CheckBox.checked && duration.denominator == 8) || (swing16CheckBox.checked && duration.denominator == 16) ) {
             return getSwingDuration(duration, positionInMeasure);
 
         } else {
@@ -524,7 +538,11 @@ MuseScore {
     function saveDefaults() {
         curScore.setMetaTag("spc_header", headerBox.text);
         curScore.setMetaTag("spc_octave_adjust", octaveAdjust.value.toString());
-        curScore.setMetaTag("spc_swing", swingCheckBox.checked);
+        curScore.setMetaTag("spc_measures_per_line", measuresPerLineField.text);
+        curScore.setMetaTag("spc_note_spaces", note_spacesCheckBox.checked);
+        curScore.setMetaTag("spc_measure_spaces", measure_spacesCheckBox.checked);
+        curScore.setMetaTag("spc_8swing", swing8CheckBox.checked);
+        curScore.setMetaTag("spc_16swing", swing16CheckBox.checked);
         curScore.setMetaTag("spc_section_labels", includeLabelsBox.checked);
         curScore.setMetaTag("spc_export_destination", exportFile.source);
         debugLog("Parameter settings saved to score");
@@ -538,7 +556,11 @@ MuseScore {
         } else {
             octaveAdjust.value = -2;
         }
-        swingCheckBox.checked = curScore.metaTag("spc_swing") === "true";
+        measuresPerLineField.text = curScore.metaTag("spc_measures_per_line");
+        note_spacesCheckBox.checked = curScore.metaTag("spc_note_spaces") === "true";
+        measure_spacesCheckBox.checked = curScore.metaTag("spc_measure_spaces") === "true";
+        swing8CheckBox.checked = curScore.metaTag("spc_8swing") === "true";
+        swing16CheckBox.checked = curScore.metaTag("spc_16swing") === "true";
         includeLabelsBox.checked = curScore.metaTag("spc_section_labels") === "true";
         exportFile.source = curScore.metaTag("spc_export_destination");
         if(exportFile.source === "") {
@@ -591,7 +613,7 @@ MuseScore {
         var endStaff = curScore.nstaves - 1;
         var staffVoices = [];
 
-        if (swingCheckBox.checked) {
+        if (swing8CheckBox.checked) {
             debugLog("Warning: Swing is turned on. Make sure that within each channel, in any beat where eighth notes occur, there are no notes of shorter" +
             " value. Otherwise, your channels may be out of sync. See the readme for more information.");
         }
@@ -636,7 +658,7 @@ MuseScore {
                         }
  
                         // add new lines
-                        if (measures % measuresPerLineField.text == 0) {
+                        if (measures % measuresPerLineField.text == 0 && repeatedCount <= 1) {
                             finalResult += "\n";
                         }
                         
@@ -727,9 +749,9 @@ MuseScore {
                     repeatedCount = 1;
                 }
             }
+
             console.log('final string: '+measure_segments, 'measures: '+measures);
             finalResult += measure_segments;
-            //finalResult += " Measures: "+measures;
             staffVoices.push(finalResult);
         }
 
