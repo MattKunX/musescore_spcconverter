@@ -1,6 +1,6 @@
 # SPC Converter for Musescore
 
-<center> ![Sample Image] (https://raw.githubusercontent.com/MattKunX/musescore_spcconverter/master/docs/sample_image.png) </center>
+<center> ![Sample Image](docs/sample_image.png) </center>
 
 This is a fork of Jared Bitz SPC Converter v0.0.1 on [GitLab](https://gitlab.com/jbitz/spcconverter). This project is an attempt by the [Com_poser](https://www.twitch.tv/com_poser) smw music porting community to continue the plugins development into a more feature robust exporter. If you would like to join this project and more please stop by the com_poser [discord](https://discord.gg/MTJyspQN).
 
