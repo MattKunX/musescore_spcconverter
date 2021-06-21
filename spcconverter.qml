@@ -573,20 +573,14 @@ MuseScore {
 
     function getVolumeFromDynamic(dynamic) {
         var volumeMap = {
-            // 255
+            // See https://docs.google.com/spreadsheets/d/1bKVuwYYAAe_jJ9UXeXnbFPn9u9fpuFrp3WUhjI0jUmM/edit#gid=109806222
             "fff": "q7F",
-            // 222
             "ff": "q7D",
-            // 186
             "f": "q7B",
-            // 150
             "mf": "q79",
             "mp": "q77",
-            // 108
             "p": "q75",
-            // 72
             "pp": "q73",
-            // 36
             "ppp": "q71"
         };
         return volumeMap[dynamic];
