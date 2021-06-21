@@ -574,20 +574,20 @@ MuseScore {
     function getVolumeFromDynamic(dynamic) {
         var volumeMap = {
             // 255
-            "fff": "FF",
+            "fff": "q7F",
             // 222
-            "ff": "DE",
+            "ff": "q7D",
             // 186
-            "f": "BA",
+            "f": "q7B",
             // 150
-            "mf": "96",
-            "mp": "96",
+            "mf": "q79",
+            "mp": "q77",
             // 108
-            "p": "6C",
+            "p": "q75",
             // 72
-            "pp": "48",
+            "pp": "q73",
             // 36
-            "ppp": "24"
+            "ppp": "q71"
         };
         return volumeMap[dynamic];
     }
@@ -602,7 +602,7 @@ MuseScore {
                 var dynamicType = annotations[i].subtypeName();
                 var volume = getVolumeFromDynamic(dynamicType) || null;
                 if (volume != null) {
-                    prefix += "v" + volume;
+                    prefix += volume;
                 } else {
                     debugLog("Warning: No support for dynamic range provided: " + dynamicType);
                 }
