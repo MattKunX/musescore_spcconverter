@@ -603,7 +603,10 @@ MuseScore {
                 var volume = getVolumeFromDynamic(dynamicType) || null;
                 if (volume != null) {
                     prefix += "v" + volume;
+                } else {
+                    debugLog("Warning: No support for dynamic range provided: " + dynamicType);
                 }
+                continue;
             }
             //Make sure it's on the current staff
             if (annotations[i].staff.is(staff)) {
