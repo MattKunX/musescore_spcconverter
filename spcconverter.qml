@@ -593,9 +593,9 @@ MuseScore {
         var postfix = "";
         for (var i = 0; i < annotations.length; i++) {
             if (annotations[i].type == Element.DYNAMIC) {
-                var dynamicType = annotations[i].subtypeName();
-                var volume = getVolumeFromDynamic(dynamicType) || null;
-                if (volume != null) {
+                const dynamicType = annotations[i].subtypeName();
+                const volume = getVolumeFromDynamic(dynamicType);
+                if (volume) {
                     prefix += volume;
                 } else {
                     debugLog("Warning: No support for dynamic range provided: " + dynamicType);
