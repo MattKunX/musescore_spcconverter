@@ -571,27 +571,52 @@ MuseScore {
         debugLog("Loaded parameter settings from score.");
     }
 
-    function processAnnotations(texts, staff) {
+    function getVolumeFromDynamic(dynamic) {
+        var volumeMap = {
+            // See https://docs.google.com/spreadsheets/d/1bKVuwYYAAe_jJ9UXeXnbFPn9u9fpuFrp3WUhjI0jUmM/edit#gid=109806222
+            "fff": "q7F",
+            "ff": "q7D",
+            "f": "q7B",
+            "mf": "q79",
+            "mp": "q77",
+            "p": "q75",
+            "pp": "q73",
+            "ppp": "q71"
+        };
+        return volumeMap[dynamic];
+    }
+
+    function processAnnotations(annotations, staff) {
         var addSection = false;
         var sectionName = "";
         var prefix = "";
         var postfix = "";
-        for (var i = 0; i < texts.length; i++) {
+        for (var i = 0; i < annotations.length; i++) {
+            if (annotations[i].type == Element.DYNAMIC) {
+                const dynamicType = annotations[i].subtypeName();
+                const volume = getVolumeFromDynamic(dynamicType);
+                if (volume) {
+                    prefix += volume;
+                } else {
+                    debugLog("Warning: No support for dynamic range provided: " + dynamicType);
+                }
+                continue;
+            }
             //Make sure it's on the current staff
-            if (texts[i].staff.is(staff)) {
-                if(texts[i].text[0] == "@") {
-                    prefix += texts[i].text.trim();
+            if (annotations[i].staff.is(staff)) {
+                if(annotations[i].text[0] == "@") {
+                    prefix += annotations[i].text.trim();
                 }
-                if (texts[i].text[0] == "-") {
-                    prefix += processCommand(texts[i].text.trim());
+                if (annotations[i].text[0] == "-") {
+                    prefix += processCommand(annotations[i].text.trim());
                 }
-                if (texts[i].text[0] == "+") {
-                    postfix += processCommand(texts[i].text.trim());
+                if (annotations[i].text[0] == "+") {
+                    postfix += processCommand(annotations[i].text.trim());
                 }
-                if(texts[i].text.indexOf("#SECTION") > -1) {
-                    if(texts[i].text.substring(0, 8) === "#SECTION") {
+                if(annotations[i].text.indexOf("#SECTION") > -1) {
+                    if(annotations[i].text.substring(0, 8) === "#SECTION") {
                         addSection = true;
-                        sectionName = texts[i].text.substring(9, texts[i].length);  
+                        sectionName = annotations[i].text.substring(9, annotations[i].length);  
                     }
                 }
             }
