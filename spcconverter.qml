@@ -312,7 +312,7 @@ MuseScore {
   // Converts a MuseScore tpc value into the corresponding note name for AddMusicK's SPC compiler
   function tpcToSpcName(tpc) {
     switch (tpc) {
-      case - 1:
+      case -1:
         return "e-";
       case 0:
         return "b-";
