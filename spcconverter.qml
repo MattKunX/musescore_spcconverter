@@ -100,8 +100,6 @@ MuseScore {
             }
         }
         
-        CheckBox { Layout.leftMargin: 10; id: unixPathsBox; text: "Use UNIX filepaths" }
-
         RowLayout {
             Layout.leftMargin: 10
             Layout.topMargin:10
@@ -186,7 +184,10 @@ MuseScore {
         folder: shortcuts.home
         onAccepted: {
             var path = fileDialog.fileUrl.toString();
-            if (unixPathsBox.checked) {
+            var os = Qt.platform.os;
+            var unixPath = (os === "linux") || (os === "osx");
+
+            if (unixPath) {
                  filePathLabel.text = path.substring(7, path.length);
                  exportFile.source = path.substring(7, path.length);
             } else {
